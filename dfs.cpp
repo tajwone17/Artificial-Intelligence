@@ -1,61 +1,37 @@
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <unordered_set>
-
+#include <bits/stdc++.h>
 using namespace std;
+const int N = 1e5 + 10;
+bool visited[N];
+vector<int> g[N];
 
-void dfs(int start, vector<vector<int>> &graph)
+void dfs(int v)
 {
-    unordered_set<int> visited;
-    stack<int> stack;
-
-    stack.push(start);
-    visited.insert(start);
-
-    while (!stack.empty())
+    // take action on vertex before entering the vertex
+    visited[v] = true;
+    cout << v << " ";
+    for (int child : g[v])
     {
-        int vertex = stack.top();
-        stack.pop();
+        if (visited[child])
+            continue;
+        // take action on child before entering the child node
 
-        cout << vertex << " ";
-
-        for (int neighbor : graph[vertex])
-        {
-            if (visited.find(neighbor) == visited.end())
-            {
-                stack.push(neighbor);
-                visited.insert(neighbor);
-            }
-        }
+        dfs(child);
+        // take action on child after exiting the child node
     }
+    // take action on vertex before exiting the vertex
 }
-
 int main()
+
 {
-    int numVertices, numEdges, startVertex;
-
-    cout << "Enter the number of vertices: ";
-    cin >> numVertices;
-
-    vector<vector<int>> graph(numVertices);
-
-    cout << "Enter the number of edges: ";
-    cin >> numEdges;
-
-    cout << "Enter the edges (vertex1 vertex2):\n";
-    for (int i = 0; i < numEdges; i++)
+    int v, e;
+    cin >> v >> e;
+    for (int i = 0; i < e; i++)
     {
-        int vertex1, vertex2;
-        cin >> vertex1 >> vertex2;
-        graph[vertex1].push_back(vertex2);
-        graph[vertex2].push_back(vertex1);
+        int n1, n2;
+        cin >> n1 >> n2;
+        g[n1].push_back(n2);
+        g[n2].push_back(n1);
     }
 
-    cout << "Enter the starting vertex: ";
-    cin >> startVertex;
-
-    dfs(startVertex, graph);
-
-    return 0;
+    dfs(1);
 }
