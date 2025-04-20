@@ -1,57 +1,50 @@
 #include <bits/stdc++.h>
 using namespace std;
+const int N = 1e5 + 10;
+bool visited[N];
+vector<int> g[N];
+int target, maxDepth;
+bool found = false;
 
-vector<int> g[100010];
-
-bool dls(int node, int target, int depth, unordered_set<int> &visited)
+void dfs(int v, int depth)
 {
-    if (depth < 0)
-        return false;
+    if (depth > maxDepth || found) return;
 
-    cout << node << " ";
-    if (node == target)
-        return true;
+    visited[v] = true;
+    cout << v << " ";
 
-    visited.insert(node);
-
-    for (int neighbor : g[node])
+    if (v == target)
     {
-        if (visited.find(neighbor) == visited.end())
-        {
-            if (dls(neighbor, target, depth - 1, visited))
-                return true;
-        }
+        found = true;
+        return;
     }
 
-    return false;
+    for (int child : g[v])
+    {
+        if (visited[child]) continue;
+        dfs(child, depth + 1);
+    }
 }
 
 int main()
 {
     int v, e;
     cin >> v >> e;
-
     for (int i = 0; i < e; i++)
     {
-        int a, b;
-        cin >> a >> b;
-        g[a].push_back(b);
-        g[b].push_back(a);
+        int n1, n2;
+        cin >> n1 >> n2;
+        g[n1].push_back(n2);
+        g[n2].push_back(n1);
     }
 
-    int start, target, maxDepth;
+    int start;
     cin >> start >> target >> maxDepth;
 
-    unordered_set<int> visited;
+    dfs(start, 0);
 
-    if (dls(start, target, maxDepth, visited))
-    {
+    if (found)
         cout << "\nTarget found\n";
-    }
     else
-    {
         cout << "\nTarget not found within depth\n";
-    }
-
-    return 0;
 }

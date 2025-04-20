@@ -1,10 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include<bits/stdc++.h>
 using namespace std;
 
+vector<int> leaves; // Global declaration of leaves
+
 // Minimax function
-int minimax(int depth, int nodeIndex, bool isMax, vector<int> &leaves, int height)
+int minimax(int depth, int nodeIndex, bool isMax, int height)
 {
     // Base case: leaf node
     if (depth == height)
@@ -14,15 +14,15 @@ int minimax(int depth, int nodeIndex, bool isMax, vector<int> &leaves, int heigh
     {
         // Maximizer's move
         return max(
-            minimax(depth + 1, nodeIndex * 2, false, leaves, height),
-            minimax(depth + 1, nodeIndex * 2 + 1, false, leaves, height));
+            minimax(depth + 1, nodeIndex * 2, false, height),
+            minimax(depth + 1, nodeIndex * 2 + 1, false, height));
     }
     else
     {
         // Minimizer's move
         return min(
-            minimax(depth + 1, nodeIndex * 2, true, leaves, height),
-            minimax(depth + 1, nodeIndex * 2 + 1, true, leaves, height));
+            minimax(depth + 1, nodeIndex * 2, true, height),
+            minimax(depth + 1, nodeIndex * 2 + 1, true, height));
     }
 }
 
@@ -33,7 +33,7 @@ int main()
     cin >> height;
 
     int leafCount = 1 << height; // 2^height
-    vector<int> leaves(leafCount);
+    leaves.resize(leafCount);
 
     cout << "Enter " << leafCount << " leaf node values (game scores):\n";
     for (int i = 0; i < leafCount; ++i)
@@ -41,7 +41,7 @@ int main()
         cin >> leaves[i];
     }
 
-    int optimalValue = minimax(0, 0, true, leaves, height);
+    int optimalValue = minimax(0, 0, true, height);
     cout << "Optimal value using Minimax: " << optimalValue << endl;
 
     return 0;

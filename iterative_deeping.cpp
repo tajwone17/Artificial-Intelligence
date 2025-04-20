@@ -1,55 +1,40 @@
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <unordered_set>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Function to perform DFS with a given maximum depth
-bool dfs(int start, int target, vector<vector<int>> &graph, int depth, unordered_set<int> &visited)
-{
-    if (depth == 0 && start == target)
-    {
-        return true;
-    }
+// DFS function for a given depth
+bool dfs(int node, int target, vector<vector<int>> &graph, int depth, unordered_set<int> &visited) {
+    if (depth < 0) return false;
 
-    if (depth == 0)
-    {
-        return false;
-    }
+    cout << node << " ";
+    if (node == target) return true;
 
-    visited.insert(start);
+    visited.insert(node);
 
-    for (int neighbor : graph[start])
-    {
-        if (visited.find(neighbor) == visited.end())
-        {
-            if (dfs(neighbor, target, graph, depth - 1, visited))
-            {
-                return true;
-            }
+    for (int neighbor : graph[node]) {
+        if (visited.find(neighbor) == visited.end()) {
+            if (dfs(neighbor, target, graph, depth - 1, visited)) return true;
         }
     }
 
     return false;
 }
 
-bool iddfs(int start, int target, vector<vector<int>> &graph, int maxDepth)
-{
-    for (int depth = 0; depth <= maxDepth; depth++)
-    {
+// IDDFS driver
+bool iddfs(int start, int target, vector<vector<int>> &graph, int maxDepth) {
+    for (int depth = 0; depth <= maxDepth; depth++) {
         unordered_set<int> visited;
-        if (dfs(start, target, graph, depth, visited))
-        {
+        cout << "Depth " << depth << ": ";
+        if (dfs(start, target, graph, depth, visited)) {
+            cout << "\nTarget found at depth " << depth << endl;
             return true;
         }
+        cout << endl;
     }
 
     return false;
 }
 
-int main()
-{
+int main() {
     int numVertices, numEdges, startVertex, targetVertex, maxDepth;
 
     cout << "Enter the number of vertices: ";
@@ -61,8 +46,7 @@ int main()
     cin >> numEdges;
 
     cout << "Enter the edges (vertex1 vertex2):\n";
-    for (int i = 0; i < numEdges; i++)
-    {
+    for (int i = 0; i < numEdges; i++) {
         int vertex1, vertex2;
         cin >> vertex1 >> vertex2;
         graph[vertex1].push_back(vertex2);
@@ -78,12 +62,7 @@ int main()
     cout << "Enter the maximum depth: ";
     cin >> maxDepth;
 
-    if (iddfs(startVertex, targetVertex, graph, maxDepth))
-    {
-        cout << "Target vertex found within the maximum depth." << endl;
-    }
-    else
-    {
+    if (!iddfs(startVertex, targetVertex, graph, maxDepth)) {
         cout << "Target vertex not found within the maximum depth." << endl;
     }
 
