@@ -1,32 +1,25 @@
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <unordered_set>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-bool dls(int start, int target, vector<vector<int>> &graph, int depth, unordered_set<int> &visited)
+vector<int> g[100010];
+
+bool dls(int node, int target, int depth, unordered_set<int> &visited)
 {
-    if (depth == 0 && start == target)
-    {
-        return true;
-    }
-
-    if (depth == 0)
-    {
+    if (depth < 0)
         return false;
-    }
 
-    visited.insert(start);
+    cout << node << " ";
+    if (node == target)
+        return true;
 
-    for (int neighbor : graph[start])
+    visited.insert(node);
+
+    for (int neighbor : g[node])
     {
         if (visited.find(neighbor) == visited.end())
         {
-            if (dls(neighbor, target, graph, depth - 1, visited))
-            {
+            if (dls(neighbor, target, depth - 1, visited))
                 return true;
-            }
         }
     }
 
@@ -35,43 +28,29 @@ bool dls(int start, int target, vector<vector<int>> &graph, int depth, unordered
 
 int main()
 {
-    int numVertices, numEdges, startVertex, targetVertex, maxDepth;
+    int v, e;
+    cin >> v >> e;
 
-    cout << "Enter the number of vertices: ";
-    cin >> numVertices;
-
-    vector<vector<int>> graph(numVertices);
-
-    cout << "Enter the number of edges: ";
-    cin >> numEdges;
-
-    cout << "Enter the edges (vertex1 vertex2):\n";
-    for (int i = 0; i < numEdges; i++)
+    for (int i = 0; i < e; i++)
     {
-        int vertex1, vertex2;
-        cin >> vertex1 >> vertex2;
-        graph[vertex1].push_back(vertex2);
-        graph[vertex2].push_back(vertex1);
+        int a, b;
+        cin >> a >> b;
+        g[a].push_back(b);
+        g[b].push_back(a);
     }
 
-    cout << "Enter the starting vertex: ";
-    cin >> startVertex;
-
-    cout << "Enter the target vertex: ";
-    cin >> targetVertex;
-
-    cout << "Enter the maximum depth: ";
-    cin >> maxDepth;
+    int start, target, maxDepth;
+    cin >> start >> target >> maxDepth;
 
     unordered_set<int> visited;
 
-    if (dls(startVertex, targetVertex, graph, maxDepth, visited))
+    if (dls(start, target, maxDepth, visited))
     {
-        cout << "Target vertex found within the maximum depth." << endl;
+        cout << "\nTarget found\n";
     }
     else
     {
-        cout << "Target vertex not found within the maximum depth." << endl;
+        cout << "\nTarget not found within depth\n";
     }
 
     return 0;

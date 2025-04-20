@@ -1,61 +1,44 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <unordered_set>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-void bfs(int start, vector<vector<int>> &graph)
-{
-    unordered_set<int> visited;
-    queue<int> queue;
+const int N = 1e5 + 10;
+vector<int> g[N];
+bool visited[N];
 
-    queue.push(start);
-    visited.insert(start);
+void bfs(int start) {
+    queue<int> q;
+    q.push(start);
+    visited[start] = true;
 
-    while (!queue.empty())
-    {
-        int vertex = queue.front();
-        queue.pop();
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        cout << v << " ";
 
-        cout << vertex << " ";
-
-        for (int neighbor : graph[vertex])
-        {
-            if (visited.find(neighbor) == visited.end())
-            {
-                queue.push(neighbor);
-                visited.insert(neighbor);
+        for (int child : g[v]) {
+            if (!visited[child]) {
+                q.push(child);
+                visited[child] = true;
             }
         }
     }
 }
 
-int main()
-{
-    int numVertices, numEdges, startVertex;
-
-    cout << "Enter the number of vertices: ";
-    cin >> numVertices;
-
-    vector<vector<int>> graph(numVertices);
-
-    cout << "Enter the number of edges: ";
-    cin >> numEdges;
-
-    cout << "Enter the edges (vertex1 vertex2):\n";
-    for (int i = 0; i < numEdges; i++)
-    {
-        int vertex1, vertex2;
-        cin >> vertex1 >> vertex2;
-        graph[vertex1].push_back(vertex2);
-        graph[vertex2].push_back(vertex1);
+int main() {
+    int v, e;
+    cin >> v >> e;
+    for (int i = 0; i < e; i++) {
+        int n1, n2;
+        cin >> n1 >> n2;
+        g[n1].push_back(n2);
+        g[n2].push_back(n1);
     }
 
-    cout << "Enter the starting vertex: ";
-    cin >> startVertex;
-
-    bfs(startVertex, graph);
+    for (int i = 1; i <= v; i++) {
+        if (!visited[i]) {
+            bfs(i);
+        }
+    }
 
     return 0;
 }
