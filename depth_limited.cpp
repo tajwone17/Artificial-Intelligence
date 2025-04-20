@@ -8,7 +8,8 @@ bool found = false;
 
 void dfs(int v, int depth)
 {
-    if (depth > maxDepth || found) return;
+    if (depth > maxDepth || found)
+        return;
 
     visited[v] = true;
     cout << v << " ";
@@ -21,7 +22,8 @@ void dfs(int v, int depth)
 
     for (int child : g[v])
     {
-        if (visited[child]) continue;
+        if (visited[child])
+            continue;
         dfs(child, depth + 1);
     }
 }
