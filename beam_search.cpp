@@ -2,89 +2,78 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
-
 using namespace std;
-
-// Node structure
-struct Node
-{
-    int value;
-    vector<Node *> children;
-    Node(int val) : value(val) {}
-};
-
-// Heuristic function (can be user-defined)
-int heuristic(Node *node)
-{
-    return node->value;
-}
-
-// Beam Search function
-void beamSearch(Node *root, int beamWidth, int goal)
-{
-    if (!root)
-        return;
-
-    queue<Node *> q;
-    q.push(root);
-
-    while (!q.empty())
-    {
-        vector<Node *> levelNodes;
-
-        // Collect all nodes at current level
-        while (!q.empty())
-        {
-            Node *node = q.front();
-            q.pop();
-
-            cout << "Visiting node with value: " << node->value << endl;
-            if (node->value == goal)
-            {
-                cout << "Goal found: " << node->value << endl;
-                return;
-            }
-
-            for (Node *child : node->children)
-            {
-                levelNodes.push_back(child);
-            }
-        }
-
-        // Sort children based on heuristic and keep top-k (beam width)
-        sort(levelNodes.begin(), levelNodes.end(), [](Node *a, Node *b)
-             {
-                 return heuristic(a) > heuristic(b); // higher value is better
-             });
-
-        // Add top-k to queue
-        for (int i = 0; i < min(beamWidth, (int)levelNodes.size()); i++)
-        {
-            q.push(levelNodes[i]);
-        }
-    }
-
-    cout << "Goal not found in the tree.\n";
-}
 
 int main()
 {
-    int beamWidth, goal;
-    cout << "Enter beam width: ";
-    cin >> beamWidth;
-    cout << "Enter goal value to search: ";
-    cin >> goal;
+    // Get number of nodes and edges from user
+    int n, e;
+    cout << "Enter number of nodes and edges: ";
+    cin >> n >> e;
 
-    // Creating a simple tree manually
-    Node *root = new Node(1);
-    root->children = {new Node(4), new Node(3), new Node(2)};
+    // Initialize heuristic values for each node and adjacency list representation of graph
+    vector<int> heuristic(n);
+    vector<vector<int>> graph(n);
 
-    root->children[0]->children = {new Node(10), new Node(5)};
-    root->children[1]->children = {new Node(8), new Node(6)};
-    root->children[2]->children = {new Node(7), new Node(9)};
+    // Get heuristic values for each node (smaller values are better)
+    cout << "Enter heuristic values:\n";
+    for (int i = 0; i < n; ++i)
+    {
+        cin >> heuristic[i];
+    }
 
-    beamSearch(root, beamWidth, goal);
+    // Build graph from edge list
+    cout << "Enter edges (u v):\n";
+    for (int i = 0; i < e; ++i)
+    {
+        int u, v;
+        cin >> u >> v;
+        graph[u].push_back(v); // Directed edge from u to v
+    }
 
-    // Memory cleanup (optional in this small example)
+    // Get search parameters
+    int start, goal, beam_width;
+    cout << "Enter start, goal, and beam width: ";
+    cin >> start >> goal >> beam_width;
+
+    // Initialize search queue with start node
+    queue<int> q;
+    q.push(start);
+
+    // Begin beam search
+    while (!q.empty())
+    {
+        // Collect all nodes at the current level
+        vector<int> next_level;
+        while (!q.empty())
+        {
+            int node = q.front();
+            q.pop();
+
+            // Check if current node is goal
+            if (node == goal)
+            {
+                cout << "Goal found at node " << node << endl;
+                return 0;
+            }
+
+            // Add all neighbors to next_level for evaluation
+            next_level.insert(next_level.end(), graph[node].begin(), graph[node].end());
+        }
+
+        // Sort nodes by heuristic value (better nodes first)
+        sort(next_level.begin(), next_level.end(), [&](int a, int b)
+             { return heuristic[a] < heuristic[b]; });
+
+        // Select the best k nodes (where k = beam_width)
+        q = queue<int>();
+        for (int i = 0; i < min(beam_width, (int)next_level.size()); ++i)
+        {
+            q.push(next_level[i]);
+        }
+    }
+
+    // If search terminates without finding goal
+    cout << "Goal not found within beam width.\n";
     return 0;
 }

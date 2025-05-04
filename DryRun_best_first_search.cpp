@@ -1,61 +1,69 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// Function to perform Best First Search
 vector<int> bestFirstSearch(vector<vector<int>> edges, int src, int target, int n)
 {
+    // cout << "=== Starting Best First Search ===" << endl;
+    // cout << "Source: " << src << ", Target: " << target << endl;
+
+    // Adjacency list: adj[node] = vector of {neighbor, weight}
     vector<vector<pair<int, int>>> adj(n);
     for (auto &edge : edges)
     {
         int u = edge[0], v = edge[1], w = edge[2];
         adj[u].emplace_back(v, w);
-        adj[v].emplace_back(u, w); // undirected
+        adj[v].emplace_back(u, w); // Undirected graph
     }
 
-    cout << "\n=== Adjacency List ===" << endl;
-    for (int i = 0; i < n; ++i)
-    {
-        cout << "Node " << i << " -> ";
-        for (auto &p : adj[i])
-        {
-            cout << "(" << p.first << ", w:" << p.second << ") ";
-        }
-        cout << endl;
-    }
+    // Print adjacency list
+    // cout << "\n=== Adjacency List ===" << endl;
+    // for (int i = 0; i < n; ++i) {
+    //     cout << "Node " << i << " -> ";
+    //     for (auto& p : adj[i]) {
+    //         cout << "(" << p.first << ", w:" << p.second << ") ";
+    //     }
+    //     cout << endl;
+    // }
 
     vector<bool> visited(n, false);
+    // Min-heap: stores {cost, node}
+
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
     pq.push({0, src});
     visited[src] = true;
 
     vector<int> path;
-    int step = 1;
+    // int step = 1;
 
-    cout << "\n=== Search Progress ===" << endl;
+    // cout << "\n=== Search Progress ===" << endl;
 
     while (!pq.empty())
     {
-        cout << "\n--- Step " << step++ << " ---" << endl;
+        // cout << "\n--- Step " << step++ << " ---" << endl;
 
+        // Get the node with the lowest cost
         pair<int, int> top = pq.top();
         int cost = top.first;
         int node = top.second;
-
         pq.pop();
-        cout << "Processing node: " << node << " (cost: " << cost << ")" << endl;
+
+        // cout << "Processing node " << node << " with cost " << cost << endl;
+
         path.push_back(node);
 
         if (node == target)
         {
-            cout << "Target node " << target << " found. Ending search." << endl;
+            // cout << "Target node " << target << " found! Search complete." << endl;
             break;
         }
 
-        cout << "Checking neighbors of node " << node << ":\n";
+        // cout << "Checking neighbors of node " << node << ":" << endl;
         for (auto &p : adj[node])
         {
             int neighbor = p.first;
-            int weight = p.second;
-            if (!visited[neighbor])
+            int weight = p.second; if (!visited[neighbor])
             {
                 visited[neighbor] = true;
                 pq.push({weight, neighbor});
@@ -63,46 +71,40 @@ vector<int> bestFirstSearch(vector<vector<int>> edges, int src, int target, int 
             }
             else
             {
-                cout << "  Node " << neighbor << " already visited, skipping." << endl;
+                cout << "  Neighbor " << neighbor << " already visited, skipping" << endl;
             }
         }
 
-        cout << "Current path: ";
-        for (int x : path)
-            cout << x << " ";
+        // // Show path progress
+        // cout << "Current path: ";
+        // for (int x : path) cout << x << " ";
         cout << endl;
     }
+
+    // cout << "\n=== Search Finished ===" << endl;
+    // cout << "Final path: ";
+    // for (int x : path) cout << x << " ";
+    // cout << endl;
 
     return path;
 }
 
 int main()
 {
-    int n, e;
-    cout << "Enter number of nodes: ";
-    cin >> n;
-    cout << "Enter number of edges: ";
-    cin >> e;
+    int n = 14;
+    vector<vector<int>> edgeList = {
+        {0, 1, 3}, {0, 2, 6}, {0, 3, 5}, {1, 4, 9}, {1, 5, 8}, {2, 6, 12}, {2, 7, 14}, {3, 8, 7}, {8, 9, 5}, {8, 10, 6}, {9, 11, 1}, {9, 12, 10}, {9, 13, 2}};
 
-    vector<vector<int>> edgeList(e);
-    cout << "Enter edges (format: u v w):\n";
-    for (int i = 0; i < e; ++i)
-    {
-        int u, v, w;
-        cin >> u >> v >> w;
-        edgeList[i] = {u, v, w};
-    }
+    int source = 0;
+    int target = 9;
 
-    int source, target;
-    cout << "Enter source node: ";
-    cin >> source;
-    cout << "Enter target node: ";
-    cin >> target;
+    cout << "=== Best First Search Example ===" << endl;
+    cout << "Graph has " << n << " nodes" << endl;
 
     vector<int> path = bestFirstSearch(edgeList, source, target, n);
 
-    cout << "\n=== Final Result ===" << endl;
-    cout << "Path from " << source << " to " << target << ": ";
+    // cout << "\n=== Result ===" << endl;
+    // cout << "Path from " << source << " to " << target << ": ";
     for (int node : path)
         cout << node << " ";
     cout << endl;
