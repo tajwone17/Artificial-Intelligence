@@ -1,111 +1,78 @@
-#include<bits/stdc++.h>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Function to perform Best-First Search
-// Returns a pair: a boolean indicating if the target was found, and the path to the target
-pair<bool, vector<int>> bestFirstSearch(int start, int target, vector<vector<int>> &graph,
-                                        function<double(int, int)> heuristic)
+vector<int> bestFirstSearch(vector<vector<int>> edges, int src, int target, int n)
 {
-    unordered_map<int, double> cost; // Stores the cost to reach each node
-    unordered_map<int, int> parent; // Stores the parent of each node for path reconstruction
-    priority_queue<pair<double, int>, vector<pair<double, int>>, greater<>> queue; // Min-heap priority queue
-
-    cost[start] = 0; // Cost to reach the start node is 0
-    queue.push({heuristic(start, target), start}); // Push the start node with its heuristic value
-
-    while (!queue.empty())
+    vector<vector<pair<int, int>>> adj(n);
+    for (auto &edge : edges)
     {
-        int current = queue.top().second; // Get the node with the lowest heuristic value
-        queue.pop();
+        int u = edge[0], v = edge[1], w = edge[2];
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w); // undirected
+    }
 
-        // If the target node is found, reconstruct the path
-        if (current == target)
+    vector<bool> visited(n, false);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    pq.push({0, src});
+    visited[src] = true;
+
+    vector<int> path;
+
+    while (!pq.empty())
+    {
+        pair<int, int> top = pq.top();
+        int cost = top.first;
+        int node = top.second;
+
+        pq.pop();
+        path.push_back(node);
+
+        if (node == target)
+            break;
+        for (auto &p : adj[node])
         {
-            vector<int> path;
-            while (current != start)
+            int neighbor = p.first;
+            int weight = p.second;
+            if (!visited[neighbor])
             {
-                path.push_back(current);
-                current = parent[current]; // Move to the parent node
-            }
-            path.push_back(start); // Add the start node to the path
-            reverse(path.begin(), path.end()); // Reverse the path to get the correct order
-            return make_pair(true, path); // Return success and the path
-        }
-
-        // Explore all neighbors of the current node
-        for (int neighbor : graph[current])
-        {
-            double newCost = cost[current] + 1; // Calculate the cost to reach the neighbor
-
-            // If the neighbor is not visited or a cheaper path is found
-            if (cost.find(neighbor) == cost.end() || newCost < cost[neighbor])
-            {
-                cost[neighbor] = newCost; // Update the cost to reach the neighbor
-                parent[neighbor] = current; // Set the current node as the parent of the neighbor
-                queue.push({heuristic(neighbor, target) + newCost, neighbor}); // Push the neighbor to the queue
+                visited[neighbor] = true;
+                pq.push({weight, neighbor});
             }
         }
     }
 
-    return make_pair(false, vector<int>()); // Return failure if the target is not found
+    return path;
 }
 
 int main()
 {
-    int numVertices, numEdges, startVertex, targetVertex;
+    int n, e;
+    cout << "Enter number of nodes: ";
+    cin >> n;
+    cout << "Enter number of edges: ";
+    cin >> e;
 
-    // Input the number of vertices in the graph
-    cout << "Enter the number of vertices: ";
-    cin >> numVertices;
-
-    vector<vector<int>> graph(numVertices); // Adjacency list representation of the graph
-
-    // Input the number of edges in the graph
-    cout << "Enter the number of edges: ";
-    cin >> numEdges;
-
-    // Input the edges of the graph
-    cout << "Enter the edges (vertex1 vertex2):\n";
-    for (int i = 0; i < numEdges; i++)
+    vector<vector<int>> edgeList(e);
+    cout << "Enter edges (format: u v w):\n";
+    for (int i = 0; i < e; ++i)
     {
-        int vertex1, vertex2;
-        cin >> vertex1 >> vertex2;
-        graph[vertex1].push_back(vertex2); // Add edge from vertex1 to vertex2
-        graph[vertex2].push_back(vertex1); // Add edge from vertex2 to vertex1 (undirected graph)
+        int u, v, w;
+        cin >> u >> v >> w;
+        edgeList[i] = {u, v, w};
     }
 
-    // Input the starting vertex
-    cout << "Enter the starting vertex: ";
-    cin >> startVertex;
+    int source, target;
+    cout << "Enter source node: ";
+    cin >> source;
+    cout << "Enter target node: ";
+    cin >> target;
 
-    // Input the target vertex
-    cout << "Enter the target vertex: ";
-    cin >> targetVertex;
+    vector<int> path = bestFirstSearch(edgeList, source, target, n);
 
-    // Define a simple heuristic function (constant value for demonstration)
-    function<double(int, int)> heuristic = [](int a, int b)
-    {
-        return 1; // Constant heuristic value
-    };
-
-    // Perform Best-First Search
-    pair<bool, vector<int>> result = bestFirstSearch(startVertex, targetVertex, graph, heuristic);
-
-    // Output the result
-    if (result.first)
-    {
-        cout << "Target vertex found. Path: ";
-        for (int vertex : result.second)
-        {
-            cout << vertex << " "; // Print the path to the target
-        }
-        cout << endl;
-    }
-    else
-    {
-        cout << "Target vertex not found." << endl; // Target not found
-    }
+    cout << "Path from " << source << " to " << target << ": ";
+    for (int node : path)
+        cout << node << " ";
+    cout << endl;
 
     return 0;
 }

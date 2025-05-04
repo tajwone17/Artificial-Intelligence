@@ -1,123 +1,111 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <unordered_map>
-#include <functional>
-#include <algorithm>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-pair<bool, vector<int>> bestFirstSearch(
-    int start,
-    int target,
-    vector<vector<int>> &graph,
-    const function<double(int, int)> &heuristic)
+vector<int> bestFirstSearch(vector<vector<int>> edges, int src, int target, int n)
 {
-    unordered_map<int, double> cost;
-    unordered_map<int, int> parent;
-    priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> queue;
-
-    cost[start] = 0;
-    queue.push({heuristic(start, target), start});
-
-    cout << "\n====== Starting Best First Search ======\n";
-
-    while (!queue.empty())
+    vector<vector<pair<int, int>>> adj(n);
+    for (auto &edge : edges)
     {
-        // Show queue status
-        cout << "\nPriority Queue: [ ";
-        priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> tempQueue = queue;
-        while (!tempQueue.empty())
+        int u = edge[0], v = edge[1], w = edge[2];
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w); // undirected
+    }
+
+    cout << "\n=== Adjacency List ===" << endl;
+    for (int i = 0; i < n; ++i)
+    {
+        cout << "Node " << i << " -> ";
+        for (auto &p : adj[i])
         {
-            cout << "(" << tempQueue.top().second << ", priority=" << tempQueue.top().first << ") ";
-            tempQueue.pop();
+            cout << "(" << p.first << ", w:" << p.second << ") ";
         }
-        cout << "]\n";
-
-        int current = queue.top().second;
-        double currentPriority = queue.top().first;
-        queue.pop();
-
-        cout << "\nVisiting Node: " << current << " (Priority: " << currentPriority << ")\n";
-
-        if (current == target)
-        {
-            cout << "Target node found!\n";
-            vector<int> path;
-            while (current != start)
-            {
-                path.push_back(current);
-                current = parent[current];
-            }
-            path.push_back(start);
-            reverse(path.begin(), path.end());
-
-            cout << "\nPath reconstruction:\n";
-            for (int p : path)
-                cout << p << " ";
-            cout << endl;
-            return {true, path};
-        }
-
-        for (int neighbor : graph[current])
-        {
-            double newCost = cost[current] + 1;
-            cout << "  Considering neighbor: " << neighbor << " (New Cost: " << newCost << ")";
-
-            if (cost.find(neighbor) == cost.end() || newCost < cost[neighbor])
-            {
-                cost[neighbor] = newCost;
-                parent[neighbor] = current;
-                double priority = heuristic(neighbor, target) + newCost;
-                queue.push({priority, neighbor});
-                cout << " -> Added to queue with priority " << priority;
-            }
-            cout << endl;
-        }
-
-        // Show cost and parent maps
-        cout << "Cost Map: ";
-        for (auto &kv : cost)
-            cout << "[" << kv.first << ":" << kv.second << "] ";
-        cout << "\nParent Map: ";
-        for (auto &kv : parent)
-            cout << "[" << kv.first << "<-" << kv.second << "] ";
         cout << endl;
     }
 
-    cout << "\nTarget node not reachable from start.\n";
-    return {false, {}};
+    vector<bool> visited(n, false);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    pq.push({0, src});
+    visited[src] = true;
+
+    vector<int> path;
+    int step = 1;
+
+    cout << "\n=== Search Progress ===" << endl;
+
+    while (!pq.empty())
+    {
+        cout << "\n--- Step " << step++ << " ---" << endl;
+
+        pair<int, int> top = pq.top();
+        int cost = top.first;
+        int node = top.second;
+
+        pq.pop();
+        cout << "Processing node: " << node << " (cost: " << cost << ")" << endl;
+        path.push_back(node);
+
+        if (node == target)
+        {
+            cout << "Target node " << target << " found. Ending search." << endl;
+            break;
+        }
+
+        cout << "Checking neighbors of node " << node << ":\n";
+        for (auto &p : adj[node])
+        {
+            int neighbor = p.first;
+            int weight = p.second;
+            if (!visited[neighbor])
+            {
+                visited[neighbor] = true;
+                pq.push({weight, neighbor});
+                cout << "  Added node " << neighbor << " to queue with cost " << weight << endl;
+            }
+            else
+            {
+                cout << "  Node " << neighbor << " already visited, skipping." << endl;
+            }
+        }
+
+        cout << "Current path: ";
+        for (int x : path)
+            cout << x << " ";
+        cout << endl;
+    }
+
+    return path;
 }
 
 int main()
 {
-    int numVertices = 5, numEdges = 6;
-    vector<vector<int>> graph(numVertices);
+    int n, e;
+    cout << "Enter number of nodes: ";
+    cin >> n;
+    cout << "Enter number of edges: ";
+    cin >> e;
 
-    vector<pair<int, int>> edges = {
-        {0, 1}, {0, 2}, {1, 3}, {2, 3}, {3, 4}, {1, 4}
-    };
-
-    for (auto &edge : edges)
+    vector<vector<int>> edgeList(e);
+    cout << "Enter edges (format: u v w):\n";
+    for (int i = 0; i < e; ++i)
     {
-        graph[edge.first].push_back(edge.second);
-        graph[edge.second].push_back(edge.first);
+        int u, v, w;
+        cin >> u >> v >> w;
+        edgeList[i] = {u, v, w};
     }
 
-    int startVertex = 0;
-    int targetVertex = 4;
+    int source, target;
+    cout << "Enter source node: ";
+    cin >> source;
+    cout << "Enter target node: ";
+    cin >> target;
 
-    // Use a lambda heuristic compatible with C++17
-    auto heuristic = [](int a, int b) -> double {
-        return 1.0; // uniform cost
-    };
+    vector<int> path = bestFirstSearch(edgeList, source, target, n);
 
-    auto result = bestFirstSearch(startVertex, targetVertex, graph, heuristic);
-
-    if (!result.first)
-    {
-        cout << "\nTarget vertex not found.\n";
-    }
+    cout << "\n=== Final Result ===" << endl;
+    cout << "Path from " << source << " to " << target << ": ";
+    for (int node : path)
+        cout << node << " ";
+    cout << endl;
 
     return 0;
 }
